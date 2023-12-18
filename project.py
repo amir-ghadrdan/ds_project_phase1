@@ -13,8 +13,6 @@ def set_list(my_list):
 
 
 def calculate_idf_words_each_paragraf(num):
-    # with open(f'data\\document_{num}.txt', "r", encoding="utf-8") as doc:
-    #     string = tokenizer(doc.read())
     list_help=[]
     #open files document and sent words in each paragraf to computeidf to calculate idf
     with open(f'data\\document_{num}.txt', "r", encoding="utf-8") as doc:
@@ -29,8 +27,6 @@ def calculate_idf_words_each_paragraf(num):
            list_help.append(dict_list1)
 
     print(computeIDF(list_help))
-    # with open(f'file_data\\file_{num}.txt', 'x', encoding="utf-8") as file:
-    #     file.write(set_list(my_list))
 
 
 def calculate_tf_words_each_paragraf(num):
@@ -79,8 +75,3 @@ def computeIDF(docList):
 
 calculate_tf_words_each_paragraf(0)
 calculate_idf_words_each_paragraf(0)
-# with open(f'data\\document_{0}.txt', "r", encoding="utf-8") as doc:
-#         string = tokenizer(doc.read())
-#         patern = "[\n|]+"
-#         my_list = re.split(patern, string)
-#         print(f"\n\n{len(my_list)}")
