@@ -2,14 +2,10 @@ import re
 import json
 from math import log
 from collections import Counter
+from tokenizer import tokenizer
 
 global idfDict
 global list_tf
-
-
-def tokenizer(text):
-    return text.lower()
-
 
 def set_list(my_list):
 
@@ -36,6 +32,7 @@ def calculate_idf_words_each_paragraf(num):
     # with open(f'file_data\\file_{num}.txt', 'x', encoding="utf-8") as file:
     #     file.write(set_list(my_list))
 
+
 def calculate_tf_words_each_paragraf(num):
         global list_tf
         list_tf=[]
@@ -50,6 +47,7 @@ def calculate_tf_words_each_paragraf(num):
            my_list1 = re.split(patern_split_words, my_list[i])
            dict_list1=set_list(my_list1)
            list_tf.append(computeTF(dict_list1,dict_list1))
+
 
 def open_json():
     with open('data.json', "r+", encoding='utf-8') as data:
@@ -77,8 +75,6 @@ def computeIDF(docList):
      list_help.append(idfDict)
      print(len(idfDict))
     return(list_help)
-
-
 
 
 calculate_tf_words_each_paragraf(0)
