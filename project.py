@@ -6,29 +6,31 @@ from tokenizer import tokenizer
 
 global idfDict
 global list_tf
+tf_idf = []
+dict_paragraf_tf_idf={}
 
 def set_list(my_list):
     return Counter(my_list)
 
 
-def calculate_idf_for_each_paragraf(num):
+def IDF_Paragraf(num):
     list_help=[]
-    #open files document and sent words in each paragraf to computeidf to calculate idf
+    #open files document and sent words in each paragraf to idf_compute to calculate idf
     with open(f'data\\document_{num}.txt', "r", encoding="utf-8") as doc:
          string = tokenizer(doc.read())
          # split each paragraf by \n
          pattern_split_paragraf = "[\n]+"
          my_list = re.split(pattern_split_paragraf, string)
-         patern_split_words = "[,. :;|]+"
+         pattern_split_words = "[,. :;|]+"
     for i in range(len(my_list)):
-           my_list1 = re.split(patern_split_words, my_list[i])
+           my_list1 = re.split(pattern_split_words, my_list[i])
            dict_list1=set_list(my_list1)
            list_help.append(dict_list1)
 
-    print(computeIDF(list_help))
+    return IDF_compute(list_help)
 
 
-def calculate_tf_for_each_paragraf(num):
+def TF_Paragraf(num):
         global list_tf
         list_tf=[]
         with open(f'data\\document_{num}.txt', "r", encoding="utf-8") as doc:
@@ -36,20 +38,19 @@ def calculate_tf_for_each_paragraf(num):
          # split each paragraf by \n
          patern_split_paragraf = "[\n]+"
          my_list = re.split(patern_split_paragraf, string)
-         patern_split_words = "[,. :;|]+"
-         print("\n"*3)
+         pattern_split_words = "[,. :;|]+"
          for i in range(len(my_list)):
-           my_list1 = re.split(patern_split_words, my_list[i])
+           my_list1 = re.split(pattern_split_words, my_list[i])
            dict_list1=set_list(my_list1)
-           list_tf.append(computeTF(dict_list1,dict_list1))
-           print(*list_tf)
+           list_tf.append(TF_compute(dict_list1,dict_list1))
+        return list_tf
 
 def open_json():
     with open('data.json', "r+", encoding='utf-8') as data:
         new_data = json.load(data)
 
 
-def computeTF(wordDict, doc):
+def TF_compute(wordDict, doc):
     tfDict = {}
     corpusCount = len(doc)
     for word, count in wordDict.items():
@@ -57,7 +58,7 @@ def computeTF(wordDict, doc):
     return(tfDict)
 
 
-def computeIDF(docList):
+def IDF_compute(docList):
     global idfDict
     idfDict = {}
     list_help=[]
@@ -68,9 +69,10 @@ def computeIDF(docList):
         idfDict[word] = log(N/ (float(val) + 1))
         
      list_help.append(idfDict)
-     print(len(idfDict))
     return(list_help)
 
-
-calculate_tf_for_each_paragraf(0)
-calculate_idf_for_each_paragraf(0)
+for i in range(len(IDF_Paragraf(0))):
+    for j in IDF_Paragraf(0)[i].keys():
+        dict_paragraf_tf_idf[j]=IDF_Paragraf(0)[i][j] * TF_Paragraf(0)[i][j]
+    tf_idf.append(dict_paragraf_tf_idf)
+    dict_paragraf_tf_idf={}
