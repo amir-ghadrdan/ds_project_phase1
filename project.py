@@ -21,13 +21,14 @@ def set_list(my_list):
 
 def tfidf_paragrafs():
     global querylist
-    querylist= re.split("[,. :;|]+", open_json()[1])
+    global list_document_query
+    list_document_query=open_json()
+    querylist= re.split("[,. :;|]+", list_document_query[1])
     list_tfidf_paragraf=[]
     list_tfidf_doc=[]
     N=counter_paragraf()[0]
-    tf_idf_query=TFIdf_compute(set_list(re.split("[,. :;|]+", open_json()[1])),N,querylist)
-    list_document=open_json()
-    for i in list_document[0] :
+    tf_idf_query=TFIdf_compute(set_list(re.split("[,. :;|]+", list_document_query[1])),N,querylist)
+    for i in list_document_query[0] :
      with open(f'..\data\\document_{i}.txt', "r", encoding="utf-8") as doc:
          string = tokenizer(doc.read())
          # split each paragraf by \n
@@ -43,6 +44,7 @@ def tfidf_paragrafs():
     return([list_tfidf_doc,tf_idf_query])
 
 def counter_paragraf():
+    global list_document_query
     count=0
     list_len_paragraf_each_doc=[]
     list_document_query=open_json()
@@ -55,12 +57,6 @@ def counter_paragraf():
          list_len_paragraf_each_doc.append(count)
     return([count,list_len_paragraf_each_doc])
 
-def open_json():
-    with open('..\data.json', "r+", encoding='utf-8') as data:
-        new_data = json.load(data)
-        documents=new_data[18]["candidate_documents_id"]
-        query=new_data[18]["query"]
-    return([documents,query.lower()])
 
 
 
@@ -103,7 +99,7 @@ def tf_idf_docANDquery():
     return [list_tf_idf_doc,list(tf_idf_query.values()),tfidf_each_paragraf]
 
 
-def cos():
+def calculate_final():
     list_cosine=[]
     list_cosine2=[]
     list_select_doc=[]
@@ -116,19 +112,27 @@ def cos():
             print(open_json()[0][i])
     # find selected paragraf
     for i in tf_idf_doc1[2]:
-        list_cosine2.append(cosine_similarity(list(i.values()),tf_idf_doc1[1]))      
+        list_cosine2.append(cosine_similarity(list(i.values()),tf_idf_doc1[1]))  
+        
     max_list2=max(list_cosine2)
     z=0
     list_is_selected=[]
+    count_pr=counter_paragraf()[1]
     for i in range(len(list_cosine2)):
         if(list_cosine2[i]==max_list2 and z==0):
-            for j in range(len(counter_paragraf()[1])):
-                if int(counter_paragraf()[1][j])>i :
-                    print(i-int(counter_paragraf()[1][j-1]))
+            for j in range(len(count_pr)):
+                if int(count_pr[j])>i and z==0:
+                    selected=i-int(count_pr[j-1])
+                    len_list_is_selected=int(count_pr[j])-int(count_pr[j-1])
                     z=1
     
-
-
+    for i in range(len_list_is_selected):
+        if i !=selected :
+              list_is_selected.append("0")
+        else:
+            
+            list_is_selected.append("1")
+    print(list_is_selected)
 
 def cosine_similarity(v1, v2):
     """
@@ -145,4 +149,33 @@ def cosine_similarity(v1, v2):
         return(0)
 
 
-cos()
+
+
+
+def open_json():
+        query= "Fluorspar"
+        documents=[
+            1295,
+            39170,
+            30055,
+            46542,
+            31596,
+            12991,
+            42106,
+            12882,
+            40355,
+            49675,
+            3523,
+            49967,
+            14185,
+            32416,
+            8938,
+            13598,
+            410,
+            5925,
+            18524,
+            40119,
+  
+        ]
+        return([documents,query.lower()])
+calculate_final()
