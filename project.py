@@ -31,7 +31,7 @@ def tfidf_paragraf_docs():
     list_tfidf_paragraf=[]
     list_tfidf_doc=[]
     N=counter_paragraf()[0]
-    tf_idf_query=TFIdf_compute(set_list(re.split("[,. :;|]+", list_document_query[1])),N,querylist)
+    tf_idf_query=TFIdf_compute_and_use_SequenceMatcher(set_list(re.split("[,. :;|]+", list_document_query[1])),N,querylist)
     for i in list_document_query[0] :
      with open(f'..\data\\document_{i}.txt', "r", encoding="utf-8") as doc:
          string = tokenizer(doc.read())
@@ -42,7 +42,7 @@ def tfidf_paragraf_docs():
      for j in range(len(my_list)):
            my_list1 = re.split(patern_split_words, my_list[j])
            dict_list1=set_list(my_list1)
-           list_tfidf_paragraf.append(TFIdf_compute(dict_list1,N,querylist))
+           list_tfidf_paragraf.append(TFIdf_compute_and_use_SequenceMatcher(dict_list1,N,querylist))
      list_tfidf_doc.append(list_tfidf_paragraf)
      list_tfidf_paragraf=[]
     return([list_tfidf_doc,tf_idf_query])
@@ -64,19 +64,21 @@ def counter_paragraf():
 
 
 
-def TFIdf_compute(wordDict,N,querylist):
+def TFIdf_compute_and_use_SequenceMatcher(wordDict,N,querylist):
     
     tfidfDict = {}
     
     corpusCount = len(wordDict)
     for i in querylist :
-        if i in wordDict:
-          tfidfDict[i] = (wordDict[i]/float(corpusCount))*(log((N+1)/ (float(wordDict[i]) + 1)))
+        for j in wordDict :
+          if SequenceMatcher(None, i, j).ratio()>0.9:
+            tfidfDict[i] = (wordDict[j]/float(corpusCount))*(log((N+1)/ (float(wordDict[j]) + 1)))
     return(tfidfDict)
+    
 
 
 def tf_idf_docANDquery():
-    
+
     global inputs_doc_query
 
     list_tf_idf_doc=[]
@@ -162,29 +164,28 @@ def cosine_similarity(v1, v2):
 
 
 def input_docANDquery():
-        query= "An hour to 1 hour 15 minutes."
+        query= "-328 degrees Fahrenheit (F)."
         documents=[
-            11743,
-            33098,
-            7050,
-            24540,
-            8638,
-            46362,
-            20890,
-            23059,
-            25242,
-            12868,
-            9284,
-            24952,
-            36222,
-            28056,
-            29221,
-            6425,
-            6463,
-            32892,
-            9815,
-            21
-  
+            11612,
+            42589,
+            49762,
+            5664,
+            3448,
+            41222,
+            1850,
+            23022,
+            8364,
+            40758,
+            43591,
+            45749,
+            33673,
+            16989,
+            26079,
+            5236,
+            30221,
+            37841,
+            8570,
+            90
         ]
         return([documents,query.lower()])
 
