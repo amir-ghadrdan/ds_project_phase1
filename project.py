@@ -10,6 +10,9 @@ import copy
 global idfDict
 global list_tf
 global list_document_query
+global inputs_doc_query
+
+
 
 def tokenizer(text):
     return text.lower()
@@ -19,10 +22,11 @@ def set_list(my_list):
     dict_list=dict(Counter(my_list))
     return dict_list
 
-def tfidf_paragrafs():
+def tfidf_paragraf_docs():
+    global inputs_doc_query
     global querylist
     global list_document_query
-    list_document_query=open_json()
+    list_document_query=inputs_doc_query
     querylist= re.split("[,. :;|]+", list_document_query[1])
     list_tfidf_paragraf=[]
     list_tfidf_doc=[]
@@ -44,10 +48,10 @@ def tfidf_paragrafs():
     return([list_tfidf_doc,tf_idf_query])
 
 def counter_paragraf():
-    global list_document_query
+    global list_document_query,inputs_doc_query
     count=0
     list_len_paragraf_each_doc=[]
-    list_document_query=open_json()
+    list_document_query=inputs_doc_query
     for i in list_document_query[0] :
       with open(f'..\data\\document_{i}.txt', "r", encoding="utf-8") as doc:
          string = tokenizer(doc.read())    
@@ -73,66 +77,74 @@ def TFIdf_compute(wordDict,N,querylist):
 
 def tf_idf_docANDquery():
     
-    
+    global inputs_doc_query
+
     list_tf_idf_doc=[]
-    querylist=re.split("[,. :;|]+", open_json()[1])
+    querylist=re.split("[,. :;|]+", inputs_doc_query[1])
     dict_querylist={}
     for i in querylist :
        dict_querylist[i]=0
-    dictionary=copy.copy(dict_querylist)
-    dictionary2=copy.copy(dict_querylist)
-    tf_idf=tfidf_paragrafs()
+    ordered_dict_based_query=copy.copy(dict_querylist)
+    ordered_dict_based_query2=copy.copy(dict_querylist)
+    tf_idf=tfidf_paragraf_docs()
     tf_idf_parags=tf_idf[0]
     tf_idf_query=tf_idf[1]
     tfidf_each_paragraf=[]
     for i in range(len(tf_idf_parags)) :
         for j in range(len(tf_idf_parags[i])):
             for k in tf_idf_parags[i][j]:
-                if k in dictionary :
-                    dictionary[k]+=tf_idf_parags[i][j][k]
-                if k in dictionary2:
-                    dictionary2[k]+=tf_idf_parags[i][j][k]
-            tfidf_each_paragraf.append(dictionary2)
-            dictionary2=copy.copy(dict_querylist)
-        list_tf_idf_doc.append(dictionary)
-        dictionary=copy.copy(dict_querylist)
+                if k in ordered_dict_based_query :
+                    ordered_dict_based_query[k]+=tf_idf_parags[i][j][k]
+                if k in ordered_dict_based_query2:
+                    ordered_dict_based_query2[k]+=tf_idf_parags[i][j][k]
+            tfidf_each_paragraf.append(ordered_dict_based_query2)
+            ordered_dict_based_query2=copy.copy(dict_querylist)
+        list_tf_idf_doc.append(ordered_dict_based_query)
+        ordered_dict_based_query=copy.copy(dict_querylist)
     return [list_tf_idf_doc,list(tf_idf_query.values()),tfidf_each_paragraf]
 
 
-def calculate_final():
-    list_cosine=[]
-    list_cosine2=[]
-    list_select_doc=[]
-    tf_idf_doc1=tf_idf_docANDquery()
-    for i in tf_idf_doc1[0]:
-        list_cosine.append(cosine_similarity(list(i.values()),tf_idf_doc1[1]))
-    max_list=max(list_cosine)
-    for i in range(len(list_cosine)):
-        if(list_cosine[i]==max_list):
-            print(open_json()[0][i])
-    # find selected paragraf
-    for i in tf_idf_doc1[2]:
-        list_cosine2.append(cosine_similarity(list(i.values()),tf_idf_doc1[1]))  
-        
-    max_list2=max(list_cosine2)
+
+def find_bestDOC_bestPARAGRAF():
+    global inputs_doc_query
+    # selected_best_doc
+    list_vector_cos_docANDquery=[]
+    list_vector_cos_paragrafs_selected_doc=[]
+    value_tf_idf_each_doc=tf_idf_docANDquery()
+    for i in value_tf_idf_each_doc[0]:
+        list_vector_cos_docANDquery.append(cosine_similarity(list(i.values()),value_tf_idf_each_doc[1]))
+    max_vector_docs=max(list_vector_cos_docANDquery)
+    for i in range(len(list_vector_cos_docANDquery)):
+        if(list_vector_cos_docANDquery[i]==max_vector_docs):
+            print(inputs_doc_query[0][i])
+
+    # selected best paragraf
+
+    for i in value_tf_idf_each_doc[2]:
+        list_vector_cos_paragrafs_selected_doc.append(cosine_similarity(list(i.values()),value_tf_idf_each_doc[1]))  
+    max_vector_paragrafs=max(list_vector_cos_paragrafs_selected_doc)
     z=0
-    list_is_selected=[]
+    list_paragraf_best_doc=[]
     count_pr=counter_paragraf()[1]
-    for i in range(len(list_cosine2)):
-        if(list_cosine2[i]==max_list2 and z==0):
+    for i in range(len(list_vector_cos_paragrafs_selected_doc)):
+        if(list_vector_cos_paragrafs_selected_doc[i]==max_vector_paragrafs and z==0):
             for j in range(len(count_pr)):
                 if int(count_pr[j])>i and z==0:
-                    selected=i-int(count_pr[j-1])
-                    len_list_is_selected=int(count_pr[j])-int(count_pr[j-1])
+                    selected_paragraf=i-int(count_pr[j-1])
+                    len_list_paragraf_best_doc=int(count_pr[j])-int(count_pr[j-1])
                     z=1
     
-    for i in range(len_list_is_selected):
-        if i !=selected :
-              list_is_selected.append("0")
+    for i in range(len_list_paragraf_best_doc):
+        if i !=selected_paragraf :
+              list_paragraf_best_doc.append("0")
         else:
             
-            list_is_selected.append("1")
-    print(list_is_selected)
+            list_paragraf_best_doc.append("1")
+
+    print(list_paragraf_best_doc)
+
+
+
 
 def cosine_similarity(v1, v2):
     """
@@ -149,33 +161,32 @@ def cosine_similarity(v1, v2):
         return(0)
 
 
-
-
-
-def open_json():
-        query= "Fluorspar"
+def input_docANDquery():
+        query= "An hour to 1 hour 15 minutes."
         documents=[
-            1295,
-            39170,
-            30055,
-            46542,
-            31596,
-            12991,
-            42106,
-            12882,
-            40355,
-            49675,
-            3523,
-            49967,
-            14185,
-            32416,
-            8938,
-            13598,
-            410,
-            5925,
-            18524,
-            40119,
+            11743,
+            33098,
+            7050,
+            24540,
+            8638,
+            46362,
+            20890,
+            23059,
+            25242,
+            12868,
+            9284,
+            24952,
+            36222,
+            28056,
+            29221,
+            6425,
+            6463,
+            32892,
+            9815,
+            21
   
         ]
         return([documents,query.lower()])
-calculate_final()
+
+inputs_doc_query=input_docANDquery()
+find_bestDOC_bestPARAGRAF()
