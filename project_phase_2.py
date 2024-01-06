@@ -6,6 +6,11 @@ import numpy as np
 import copy
 import heapq
 import string
+from sklearn.decomposition import PCA
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.cluster import KMeans
+from sklearn.datasets import fetch_20newsgroups
+import matplotlib
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 
@@ -197,7 +202,14 @@ def find_the_5_important_words(document_id):
         top_items = heapq.nlargest(5, tfidfDict.items(), key=lambda x: x[1])
         top_keys = [key for key, value in top_items]
 
-        return top_keys
+        return [tfidfDict, top_keys]
+
+
+def dimension_reducer(vector):
+    norm_vector = np.array(list(vector.values())).reshape(-1, 6)
+    pca = PCA(n_components=2)
+    data_reduced = pca.fit_transform(norm_vector)
+    return data_reduced
 
 
 def input_docANDquery():
