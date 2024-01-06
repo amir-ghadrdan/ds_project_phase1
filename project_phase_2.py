@@ -2,6 +2,7 @@ import re
 from math import log
 from collections import Counter
 from difflib import SequenceMatcher
+from matplotlib import pyplot as plt
 import numpy as np
 import copy
 import heapq
@@ -206,7 +207,10 @@ def find_the_5_important_words(document_id):
 
 
 def dimension_reducer(vector):
-    norm_vector = np.array(list(vector.values())).reshape(-1, 6)
+    if len(list(vector.values())) % 2 != 0:
+        norm_vector = np.array(list(vector.values())[:-1]).reshape(-1, 2)
+    else:
+        norm_vector = np.array(list(vector.values())).reshape(-1, 2)
     pca = PCA(n_components=2)
     data_reduced = pca.fit_transform(norm_vector)
     return data_reduced
@@ -220,3 +224,5 @@ def input_docANDquery():
 
 inputs_doc_query = input_docANDquery()
 find_bestDOC_bestPARAGRAF()
+
+print(dimension_reducer(find_the_5_important_words(1)[0])[0])
