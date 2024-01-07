@@ -2,16 +2,13 @@ import re
 from math import log
 from collections import Counter
 from difflib import SequenceMatcher
-from matplotlib import pyplot as plt
+from matplotlib import pyplot
 import numpy as np
 import copy
 import heapq
 import string
 from sklearn.decomposition import PCA
-from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.cluster import KMeans
-from sklearn.datasets import fetch_20newsgroups
-import matplotlib
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 
@@ -206,14 +203,16 @@ def find_the_5_important_words(document_id):
         return [tfidfDict, top_keys]
 
 
-def dimension_reducer(vector):
-    if len(list(vector.values())) % 2 != 0:
-        norm_vector = np.array(list(vector.values())[:-1]).reshape(-1, 2)
-    else:
-        norm_vector = np.array(list(vector.values())).reshape(-1, 2)
-    pca = PCA(n_components=2)
-    data_reduced = pca.fit_transform(norm_vector)
-    return data_reduced
+def docs_visualizer(n):
+    vector_docs = []
+    for i in range(n):
+        five_important_words = []
+        tfidf_doc, top_keys = find_the_5_important_words(i)[0], find_the_5_important_words(i)[1]
+        five_important_words = [tfidf_doc[key] for key in top_keys[:5]]
+        vector_docs.append(five_important_words)
+    two_dimension_data = PCA(n_components=2).fit_transform(vector_docs)
+    pyplot.scatter(two_dimension_data[:, 0], two_dimension_data[:, 1], c=KMeans(n_clusters=4, random_state=0).fit(two_dimension_data).labels_, cmap='plasma')
+    pyplot.show()
 
 
 def input_docANDquery():
@@ -222,7 +221,4 @@ def input_docANDquery():
     return ([documents, query.lower()])
 
 
-inputs_doc_query = input_docANDquery()
-find_bestDOC_bestPARAGRAF()
-
-print(dimension_reducer(find_the_5_important_words(1)[0])[0])
+docs_visualizer(int(input("Please enter a number: ")))
